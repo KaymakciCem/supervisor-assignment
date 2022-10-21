@@ -1,0 +1,23 @@
+version: '3'
+services:
+  mysql-standalone:
+    image: 'mysql:5.6'
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=hierarchyDb
+    ports:
+      - "3307:3306"
+
+#  supervisor-assignment:
+#    image: supervisor-assignment
+#    ports:
+#      - 8087:8087
+#    build:
+#      context: "./"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-standalone:3306/hierarchyDb?autoReconnect=true&useSSL=false
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: password
+#    depends_on:
+#      -   mysql-standalone
