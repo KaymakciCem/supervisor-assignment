@@ -1,18 +1,17 @@
 package com.personia.supervisorassignment.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.personia.supervisorassignment.data.EmployeeEntity;
 import com.personia.supervisorassignment.data.HierarchyRepository;
 import com.personia.supervisorassignment.error.CycleDetectedException;
@@ -27,8 +26,9 @@ import lombok.RequiredArgsConstructor;
 public class CompanyHierarchyService {
 
     private final HierarchyRepository hierarchyRepository;
+    private final ObjectMapper mapper;
 
-    public Set<String> createHierarchy(final Map<String, String> hierarchyRequest) {
+    public String createHierarchy(final Map<String, String> hierarchyRequest) {
         final Graph graph = createGraph(hierarchyRequest);
         boolean cyclicGraph = graph.hasCycle();
 
@@ -47,36 +47,38 @@ public class CompanyHierarchyService {
                                                          .map(EmployeeEntity::getEmployeeName)
                                                          .findFirst();
         if (rootVal.isEmpty()) {
-            return Collections.emptySet();
+            return "";
         }
 
-        final Set<String> response = new LinkedHashSet<>();
-        response.add(rootVal.get());
-        createResponse(rootVal.get(), employeeEntities, response);
+        final ObjectNode rootNode = mapper.createObjectNode();
+        final ObjectNode childNode = mapper.createObjectNode();
+        rootNode.putIfAbsent(rootVal.get(), childNode);
+        createResponse(rootVal.get(), employeeEntities, childNode);
 
         hierarchyRepository.saveAll(employeeEntities);
 
-        return response;
+        return rootNode.toString();
     }
 
-    private void createResponse(final String name, final List<EmployeeEntity> employees, final Set<String> response) {
+    private void createResponse(final String name, final List<EmployeeEntity> employees, final ObjectNode node) {
         final List<EmployeeEntity> neighbours = employees.stream()
-                                                  .filter(c -> Objects.equals(c.getSupervisorName(), name))
-                                                  .toList();
+                                                         .filter(c -> Objects.equals(c.getSupervisorName(), name))
+                                                         .toList();
 
         if (CollectionUtils.isEmpty(neighbours)) {
             return;
         }
-        
+
+        final ObjectNode childNode = mapper.createObjectNode();
+
         if (neighbours.size() > 1) {
-            StringBuilder val = new StringBuilder();
-            neighbours.forEach(c -> val.append("\t").append(c.getEmployeeName()).append("\n"));
-            response.add(val.toString());
+            neighbours.forEach(c -> childNode.putIfAbsent(c.getEmployeeName(), mapper.createObjectNode()));
         } else {
-            response.add("\t" + neighbours.get(0).getEmployeeName());
+            childNode.putIfAbsent(neighbours.get(0).getEmployeeName(), mapper.createObjectNode());
         }
 
-        createResponse(neighbours.get(0).getEmployeeName(), employees, response);
+        node.putIfAbsent("", childNode);
+        createResponse(neighbours.get(0).getEmployeeName(), employees, childNode);
     }
 
     private List<EmployeeEntity> createEmployeeEntities(final Graph graph) {
