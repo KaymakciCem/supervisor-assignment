@@ -15,8 +15,9 @@ This project helps us to create the hierarchy between employees.
 request for creating the hierarchy based on a given input
 ```curl
 curl --location --request POST 'http://localhost:8087/hierarchy' \
---header 'Authorization: Basic Y3JlZGl0b2ZmZXI6cGFzc3dvcmQ=' \
+--header 'Authorization: Basic dXNlcjpwYXNzd29yZA==' \
 --header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=032479975135B169B4E12357800F46BE' \
 --data-raw '{
     "Pete": "Nick",
     "Nick": "Sophie",
@@ -27,15 +28,9 @@ curl --location --request POST 'http://localhost:8087/hierarchy' \
 
 retrieve the two supervisors of the given employee
 ```curl
-curl --location --request GET 'http://localhost:8087/hierarchy/supervisors/Pete' \
---header 'Content-Type: application/json' \
---data-raw '{
-"Pete": "Nick",
-"Nick": "Sophie",
-"Barbara": "Nick",
-"Sophie": "Jonas",
-"Cem": "Gülsüm"
-}'
+curl --location --request GET 'http://localhost:8087/hierarchy/supervisors/Barbara' \
+--header 'Authorization: Basic dXNlcjpwYXNzd29yZA==' \
+--header 'Cookie: JSESSIONID=032479975135B169B4E12357800F46BE'
 ```
 
 ### Tech Stack

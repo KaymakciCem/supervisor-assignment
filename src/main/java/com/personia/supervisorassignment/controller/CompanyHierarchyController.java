@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,11 +33,13 @@ public class CompanyHierarchyController {
 
     private final CompanyHierarchyService hierarchyService;
 
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping(produces = APPLICATION_JSON_VALUE)
     public String createHierarchy(@RequestBody final Map<String, String> hierarchyRequest) {
         return hierarchyService.createHierarchy(hierarchyRequest);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @GetMapping(value = "/supervisors/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Object> getSupervisor(@PathVariable("name") String name) {
         return hierarchyService.getSupervisor(name);
