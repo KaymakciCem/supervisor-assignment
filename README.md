@@ -10,7 +10,10 @@ This project helps us to create the hierarchy between employees.
 - The API exposes two endpoints.
 - first one generates the hierarchy between the employees and sends it back to the user as a json response
 - Second one helps us to retrieve the two supervisors for the given employee
-
+- Username and password is required for the endpoints and below postman collections already have them.
+- In case you need the values are as follows:
+  - username: user
+  - password: password
 
 request for creating the hierarchy based on a given input
 ```curl
