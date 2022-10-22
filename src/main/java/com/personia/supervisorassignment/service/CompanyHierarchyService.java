@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -28,6 +30,7 @@ public class CompanyHierarchyService {
     private final HierarchyRepository hierarchyRepository;
     private final ObjectMapper mapper;
 
+    @Transactional
     public String createHierarchy(final Map<String, String> hierarchyRequest) {
         final Graph graph = createGraph(hierarchyRequest);
         boolean cyclicGraph = graph.hasCycle();
