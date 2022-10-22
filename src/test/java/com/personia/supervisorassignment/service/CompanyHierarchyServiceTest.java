@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.personia.supervisorassignment.data.HierarchyRepository;
 import com.personia.supervisorassignment.error.CycleDetectedException;
 import com.personia.supervisorassignment.error.MultipleRootsDetectedException;
@@ -28,8 +30,13 @@ class CompanyHierarchyServiceTest {
     @Mock
     private HierarchyRepository hierarchyRepository;
 
-    @InjectMocks
     private CompanyHierarchyService hierarchyService;
+
+    @BeforeEach
+    void setUp() {
+        ObjectMapper mapper = new ObjectMapper();
+        hierarchyService = new CompanyHierarchyService(hierarchyRepository, mapper);
+    }
 
     @Test
     void createHierarchy_fails_cycle_detected() {
@@ -49,17 +56,8 @@ class CompanyHierarchyServiceTest {
 
     @Test
     void createHierarchy_success() {
-        Set<String> hierarchy = hierarchyService.createHierarchy(Map.of("Pete", "Nick", "Nick", "Sophie", "Barbara", "Nick", "Sophie", "Jonas"));
-
-        Set<String> expected = new LinkedHashSet();
-        expected.add("Jonas");
-        expected.add("\tSophie");
-        expected.add("\tNick");
-        expected.add("\tBarbara\n\tPete\n");
-
-        assertThat(hierarchy).contains("Jonas");
-        assertThat(hierarchy).contains("\tSophie");
-        assertThat(hierarchy).contains("\tNick");
+        String hierarchy = hierarchyService.createHierarchy(Map.of("Pete", "Nick", "Nick", "Sophie", "Barbara", "Nick", "Sophie", "Jonas"));
+        assertThat(hierarchy).contains("Jonas").contains("Sophie").contains("Nick").contains("Barbara").contains("Pete");
     }
 
     @Test
